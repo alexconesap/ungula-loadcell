@@ -73,7 +73,7 @@ All four expose the same `IAdc24` surface. Pick the chip at construction time an
 ## Quick Start
 
 ```cpp
-#include <ungula_loadcell_lib.h>
+#include <ungula_loadcell.h>
 
 using MU = ungula::LoadCell::ForceUnit;
 
@@ -336,7 +336,7 @@ void loop() {
 `TensionSensor` wraps a `LoadCell` and adds exponential moving average (EMA) filtering, stability detection, and target comparison with configurable tolerance bands. It keeps the filtering and "am I close enough?" logic in one place instead of spreading it across every caller.
 
 ```cpp
-#include <ungula_loadcell_lib.h>
+#include <ungula_loadcell.h>
 
 using FU = ungula::LoadCell::ForceUnit;
 

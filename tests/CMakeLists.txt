@@ -15,7 +15,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 # ---------------------------------------------------------------------------
-# Dependencies: ungula-lib (TimeControl stub hooks).
+# Dependencies: UngulaCore (TimeControl stub hooks).
 #
 # By default we use sibling directory ../../lib which is the layout during
 # local development. External consumers can set -DUSE_LOCAL_DEPS=OFF to fetch
@@ -28,12 +28,12 @@ if(USE_LOCAL_DEPS)
     set(LIB_HAL_SRC ${CMAKE_CURRENT_LIST_DIR}/../../lib_hal/src)
 else()
     FetchContent_Declare(
-        ungula_lib
+        ungula_core
         GIT_REPOSITORY https://github.com/alexconesap/ungula-core.git
         GIT_TAG main
     )
-    FetchContent_MakeAvailable(ungula_lib)
-    set(LIB_SRC ${ungula_lib_SOURCE_DIR}/src)
+    FetchContent_MakeAvailable(ungula_core)
+    set(LIB_SRC ${ungula_core_SOURCE_DIR}/src)
 endif()
 
 set(LIB_LOADCELL_SRC ${CMAKE_CURRENT_LIST_DIR}/../src)
