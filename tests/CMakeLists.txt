@@ -53,7 +53,7 @@ include_directories(
 # ---------------------------------------------------------------------------
 add_executable(test_ungula_loadcell
     test_load_cell.cpp
-    ArduinoStub/system_stub.cpp
+
     ${LIB_LOADCELL_SRC}/loadcell/load_cell.cpp
 )
 target_link_libraries(test_ungula_loadcell gtest_main)
@@ -65,7 +65,7 @@ target_link_libraries(test_ungula_loadcell gtest_main)
 # ---------------------------------------------------------------------------
 add_executable(test_ungula_drivers
     test_drivers.cpp
-    ArduinoStub/system_stub.cpp
+
     ${LIB_LOADCELL_SRC}/loadcell/drivers/hx711.cpp
     ${LIB_LOADCELL_SRC}/loadcell/drivers/nau7802.cpp
     ${LIB_LOADCELL_SRC}/loadcell/drivers/ads1220.cpp
@@ -81,7 +81,7 @@ target_link_libraries(test_ungula_drivers gtest_main)
 # ---------------------------------------------------------------------------
 add_executable(test_ungula_tension
     test_tension_sensor.cpp
-    ArduinoStub/system_stub.cpp
+
     ${LIB_LOADCELL_SRC}/loadcell/load_cell.cpp
     ${LIB_LOADCELL_SRC}/loadcell/tension_sensor.cpp
 )
