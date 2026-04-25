@@ -192,7 +192,7 @@ namespace ungula {
     }
 
     bool ADS1232::waitReadyUntil(uint32_t timeoutMs, uint32_t pollDelayMs) const {
-        const TimeControl::ms_tick_t start = TimeControl::millis();
+        const TimeControl::tick_ms_t start = TimeControl::millis();
         while ((TimeControl::millis() - start) < timeoutMs) {
             if (isReady()) {
                 return true;

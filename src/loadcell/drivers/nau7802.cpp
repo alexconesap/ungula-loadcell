@@ -69,7 +69,7 @@ namespace ungula {
         }
 
         // Wait for PUR (power-up ready) — max ~200ms.
-        const TimeControl::ms_tick_t start = TimeControl::millis();
+        const TimeControl::tick_ms_t start = TimeControl::millis();
         while ((TimeControl::millis() - start) < 500U) {
             uint8_t puCtrl = 0;
             if (readReg(REG_PU_CTRL, puCtrl) && (puCtrl & PU_CTRL_PUR) != 0) {
@@ -146,7 +146,7 @@ namespace ungula {
     }
 
     bool NAU7802::readRawWithin(int32_t& outRaw, uint32_t timeoutMs, uint32_t pollDelayMs) {
-        const TimeControl::ms_tick_t start = TimeControl::millis();
+        const TimeControl::tick_ms_t start = TimeControl::millis();
         while ((TimeControl::millis() - start) < timeoutMs) {
             if (readRawIfReady(outRaw)) {
                 return true;
@@ -171,7 +171,7 @@ namespace ungula {
         setBits(REG_PU_CTRL, PU_CTRL_PUD);
         setBits(REG_PU_CTRL, PU_CTRL_PUA);
 
-        const TimeControl::ms_tick_t start = TimeControl::millis();
+        const TimeControl::tick_ms_t start = TimeControl::millis();
         while ((TimeControl::millis() - start) < readyTimeoutMs) {
             uint8_t puCtrl = 0;
             if (readReg(REG_PU_CTRL, puCtrl) && (puCtrl & PU_CTRL_PUR) != 0) {
@@ -261,7 +261,7 @@ namespace ungula {
         }
 
         // Wait for CALS bit to clear (calibration complete).
-        const TimeControl::ms_tick_t start = TimeControl::millis();
+        const TimeControl::tick_ms_t start = TimeControl::millis();
         while ((TimeControl::millis() - start) < 1000U) {
             uint8_t ctrl2 = 0;
             if (readReg(REG_CTRL2, ctrl2) && (ctrl2 & CTRL2_CALS) == 0) {
