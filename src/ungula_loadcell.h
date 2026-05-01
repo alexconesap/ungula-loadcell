@@ -12,8 +12,8 @@
 
 // Depend on UngulaCore and UngulaHal — must be included first so
 // Arduino CLI discovers their include paths before our headers reference them.
-#include <ungula_hal.h>
 #include <ungula_core.h>
+#include <ungula_hal.h>
 
 // Chip-neutral interface (implemented by every concrete ADC driver)
 #include "loadcell/i_adc24.h"
