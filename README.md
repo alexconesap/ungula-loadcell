@@ -67,7 +67,7 @@ All four expose the same `IAdc24` surface. Pick the chip at construction time an
 
 ## Dependencies
 
-- `UngulaCore` — provides `TimeControl` abstraction.
+- `UngulaCore` — provides `ungula::core::time` abstraction.
 - `UngulaHal` — provides `gpio::`, `i2c::I2cMaster`, `spi::SpiMaster`.
 
 ## Quick Start
@@ -327,7 +327,7 @@ void loop() {
 
   // HX711 outputs at ~10 or ~80 SPS depending on RATE pin.
   // No need to poll faster than the conversion rate.
-  TimeControl::delayMs(100);
+  ungula::core::time::delayMs(100);
 }
 ```
 

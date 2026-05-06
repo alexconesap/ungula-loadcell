@@ -10,7 +10,7 @@
 namespace ungula::loadcell {
 
     using namespace ungula::hal;
-    using ungula::core::time::TimeControl;
+    namespace tc = ungula::core::time;
 
     // ---- I2C register helpers ----
 
@@ -72,13 +72,13 @@ namespace ungula::loadcell {
         }
 
         // Wait for PUR (power-up ready) — max ~200ms.
-        const TimeControl::tick_ms_t start = TimeControl::millis();
-        while ((TimeControl::millis() - start) < 500U) {
+        const tc::tick_ms_t start = tc::millis();
+        while ((tc::millis() - start) < 500U) {
             uint8_t puCtrl = 0;
             if (readReg(REG_PU_CTRL, puCtrl) && (puCtrl & PU_CTRL_PUR) != 0) {
                 break;
             }
-            TimeControl::delayMs(1);
+            tc::delayMs(1);
         }
 
         // Check if PUR is set.
@@ -149,12 +149,12 @@ namespace ungula::loadcell {
     }
 
     bool NAU7802::readRawWithin(int32_t& outRaw, uint32_t timeoutMs, uint32_t pollDelayMs) {
-        const TimeControl::tick_ms_t start = TimeControl::millis();
-        while ((TimeControl::millis() - start) < timeoutMs) {
+        const tc::tick_ms_t start = tc::millis();
+        while ((tc::millis() - start) < timeoutMs) {
             if (readRawIfReady(outRaw)) {
                 return true;
             }
-            TimeControl::delayMs(pollDelayMs);
+            tc::delayMs(pollDelayMs);
         }
         return false;
     }
@@ -174,13 +174,13 @@ namespace ungula::loadcell {
         setBits(REG_PU_CTRL, PU_CTRL_PUD);
         setBits(REG_PU_CTRL, PU_CTRL_PUA);
 
-        const TimeControl::tick_ms_t start = TimeControl::millis();
-        while ((TimeControl::millis() - start) < readyTimeoutMs) {
+        const tc::tick_ms_t start = tc::millis();
+        while ((tc::millis() - start) < readyTimeoutMs) {
             uint8_t puCtrl = 0;
             if (readReg(REG_PU_CTRL, puCtrl) && (puCtrl & PU_CTRL_PUR) != 0) {
                 return true;
             }
-            TimeControl::delayMs(1);
+            tc::delayMs(1);
         }
         return false;
     }
@@ -191,7 +191,7 @@ namespace ungula::loadcell {
         }
         // RR bit triggers a full register reset.
         setBits(REG_PU_CTRL, PU_CTRL_RR);
-        TimeControl::delayMs(1);
+        tc::delayMs(1);
         clearBits(REG_PU_CTRL, PU_CTRL_RR);
 
         initialized_ = false;
@@ -264,13 +264,13 @@ namespace ungula::loadcell {
         }
 
         // Wait for CALS bit to clear (calibration complete).
-        const TimeControl::tick_ms_t start = TimeControl::millis();
-        while ((TimeControl::millis() - start) < 1000U) {
+        const tc::tick_ms_t start = tc::millis();
+        while ((tc::millis() - start) < 1000U) {
             uint8_t ctrl2 = 0;
             if (readReg(REG_CTRL2, ctrl2) && (ctrl2 & CTRL2_CALS) == 0) {
                 return (ctrl2 & CTRL2_CAL_ERR) == 0;  // true if no error
             }
-            TimeControl::delayMs(1);
+            tc::delayMs(1);
         }
         return false;  // timeout
     }

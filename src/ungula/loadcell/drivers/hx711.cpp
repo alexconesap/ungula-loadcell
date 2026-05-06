@@ -15,7 +15,7 @@
 namespace ungula::loadcell {
 
     using namespace ungula::hal;
-    using ungula::core::time::TimeControl;
+    namespace tc = ungula::core::time;
 
     namespace {
 #if defined(ESP_PLATFORM)
@@ -50,7 +50,7 @@ namespace ungula::loadcell {
 
         for (uint8_t i = 0; i < 8U; ++i) {
             gpio::setHigh(clockPin);
-            TimeControl::delayUs(kClockPulseDelayUs);
+            tc::delayUs(kClockPulseDelayUs);
 
             value <<= 1U;
             if (gpio::read(dataPin)) {
@@ -58,7 +58,7 @@ namespace ungula::loadcell {
             }
 
             gpio::setLow(clockPin);
-            TimeControl::delayUs(kClockPulseDelayUs);
+            tc::delayUs(kClockPulseDelayUs);
         }
 
         return value;
@@ -157,7 +157,7 @@ namespace ungula::loadcell {
         // HX711 enters power-down when PD_SCK stays high for more than 60us (datasheet).
         // 70us gives a small margin.
         gpio::setHigh(clockPin_);
-        TimeControl::delayUs(70);
+        tc::delayUs(70);
     }
 
     bool HX711::powerUp(uint32_t readyTimeoutMs) {
@@ -183,13 +183,13 @@ namespace ungula::loadcell {
     }
 
     bool HX711::waitReadyUntil(uint32_t timeoutMs, uint32_t pollDelayMs) const {
-        const TimeControl::tick_ms_t start = TimeControl::millis();
+        const tc::tick_ms_t start = tc::millis();
 
-        while ((TimeControl::millis() - start) < timeoutMs) {
+        while ((tc::millis() - start) < timeoutMs) {
             if (isReady()) {
                 return true;
             }
-            TimeControl::delayMs(pollDelayMs);
+            tc::delayMs(pollDelayMs);
         }
 
         return false;  // timeout expired
@@ -198,9 +198,9 @@ namespace ungula::loadcell {
     void HX711::applyConfigSelection() {
         for (uint8_t i = 0; i < extraPulses_; ++i) {
             gpio::setHigh(clockPin_);
-            TimeControl::delayUs(kClockPulseDelayUs);
+            tc::delayUs(kClockPulseDelayUs);
             gpio::setLow(clockPin_);
-            TimeControl::delayUs(kClockPulseDelayUs);
+            tc::delayUs(kClockPulseDelayUs);
         }
     }
 

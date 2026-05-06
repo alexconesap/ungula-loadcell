@@ -8,7 +8,7 @@
 
 namespace ungula::loadcell {
 
-    using ungula::core::time::TimeControl;
+    namespace tc = ungula::core::time;
 
     bool TensionSensor::readInstant(float& outTension) {
         float value = 0.0F;
@@ -23,9 +23,9 @@ namespace ungula::loadcell {
     }
 
     bool TensionSensor::readStable(float& outTension, uint32_t timeoutMs, uint32_t pollDelayMs) {
-        const auto start = TimeControl::millis();
+        const auto start = tc::millis();
 
-        while ((TimeControl::millis() - start) < timeoutMs) {
+        while ((tc::millis() - start) < timeoutMs) {
             float value = 0.0F;
             if (loadCell_.readIfReady(value, config_.unit)) {
                 lastTension_ = value;
@@ -38,9 +38,9 @@ namespace ungula::loadcell {
             }
 
             if (pollDelayMs > 0U) {
-                TimeControl::delayMs(pollDelayMs);
+                tc::delayMs(pollDelayMs);
             } else {
-                TimeControl::yield();
+                tc::yield();
             }
         }
 

@@ -15,7 +15,7 @@
 namespace ungula::loadcell {
 
     using namespace ungula::hal;
-    using ungula::core::time::TimeControl;
+    namespace tc = ungula::core::time;
 
     namespace {
 #if defined(ESP_PLATFORM)
@@ -98,7 +98,7 @@ namespace ungula::loadcell {
     void ADS1232::powerDown() {
         if (pdwnPin_ != GPIO_NONE) {
             gpio::setLow(pdwnPin_);  // PDWN active low — low = power down
-            TimeControl::delayUs(100);
+            tc::delayUs(100);
         }
     }
 
@@ -163,16 +163,16 @@ namespace ungula::loadcell {
 
     void ADS1232::clockPulse() {
         gpio::setHigh(sclkPin_);
-        TimeControl::delayUs(kClockPulseDelayUs);
+        tc::delayUs(kClockPulseDelayUs);
         gpio::setLow(sclkPin_);
-        TimeControl::delayUs(kClockPulseDelayUs);
+        tc::delayUs(kClockPulseDelayUs);
     }
 
     uint8_t ADS1232::shiftInByteMsbFirst(uint8_t doutPin, uint8_t sclkPin) {
         uint8_t value = 0U;
         for (uint8_t i = 0; i < 8U; ++i) {
             gpio::setHigh(sclkPin);
-            TimeControl::delayUs(kClockPulseDelayUs);
+            tc::delayUs(kClockPulseDelayUs);
 
             value <<= 1U;
             if (gpio::read(doutPin)) {
@@ -180,7 +180,7 @@ namespace ungula::loadcell {
             }
 
             gpio::setLow(sclkPin);
-            TimeControl::delayUs(kClockPulseDelayUs);
+            tc::delayUs(kClockPulseDelayUs);
         }
         return value;
     }
@@ -195,12 +195,12 @@ namespace ungula::loadcell {
     }
 
     bool ADS1232::waitReadyUntil(uint32_t timeoutMs, uint32_t pollDelayMs) const {
-        const TimeControl::tick_ms_t start = TimeControl::millis();
-        while ((TimeControl::millis() - start) < timeoutMs) {
+        const tc::tick_ms_t start = tc::millis();
+        while ((tc::millis() - start) < timeoutMs) {
             if (isReady()) {
                 return true;
             }
-            TimeControl::delayMs(pollDelayMs);
+            tc::delayMs(pollDelayMs);
         }
         return false;
     }

@@ -228,7 +228,7 @@ Methods (all pure virtual):
   sample.
 - `bool readRawWithin(int32_t& outRaw, uint32_t timeoutMs, uint32_t pollDelayMs)`
   — wait up to `timeoutMs`; `pollDelayMs` is a cooperative yield between
-  ready checks (`0` falls back to `TimeControl::yield()`).
+  ready checks (`0` falls back to `ungula::core::time::yield()`).
 - `void powerDown()` — chip-specific low-power mode.
 - `bool powerUp(uint32_t readyTimeoutMs)` — wake and block until first
   post-wake sample.
@@ -445,7 +445,7 @@ No exceptions, no error codes — boolean returns and `NAN` sentinels.
 
 ## Threading / timing / hardware notes
 
-- All time / delay calls go through `ungula::core::time::TimeControl` (project
+- All time / delay calls go through `ungula::core::time` (project
   rule). Do not call `millis()` / `delay()` directly when extending or
   composing this library.
 - Bit-bang drivers (HX711, ADS1232) take a critical section on ESP32
@@ -454,7 +454,7 @@ No exceptions, no error codes — boolean returns and `NAN` sentinels.
   bounded but not interrupt-safe to call **from** an ISR. Call from
   task / loop context only.
 - `readWithin(..., pollDelayMs)` cooperates: `0` yields via
-  `TimeControl::yield()`, non-zero sleeps via `TimeControl::delayMs()`.
+  `ungula::core::time::yield()`, non-zero sleeps via `ungula::core::time::delayMs()`.
 - All driver state is heap-free after `begin()`. `LoadCell` and
   `TensionSensor` allocate nothing at runtime.
 - Wire structs / packing are not used here — there is no network layer.
@@ -506,7 +506,7 @@ private logic into your code.
   after each `readRaw*`. In `CONTINUOUS` mode it is not needed.
 - For NAU7802, call `calibrateAfe()` after every gain / channel /
   sample-rate change.
-- Do not call `millis()` / `delay()` directly — use `TimeControl`.
+- Do not call `millis()` / `delay()` directly — use `ungula::core::time`.
 - Do not allocate after `setup()`. None of the classes here need it.
 - Preserve the project's terminology: `ForceUnit::NEWTONS / KGF / LBF`,
   `captureZero`, `countsPerNewton`, `readIfReady` / `readWithin`,

@@ -11,7 +11,7 @@
 namespace ungula::loadcell {
 
     using namespace ungula::hal;
-    using ungula::core::time::TimeControl;
+    namespace tc = ungula::core::time;
 
     // ---- SPI command helpers ----
 
@@ -49,7 +49,7 @@ namespace ungula::loadcell {
 
         // Send RESET command, wait for settling.
         sendCommand(CMD_RESET);
-        TimeControl::delayMs(1);
+        tc::delayMs(1);
 
         // Default register config: AIN0-AIN1 differential, gain 128, 20 SPS, continuous, internal
         // ref.
@@ -114,7 +114,7 @@ namespace ungula::loadcell {
             return;
         }
         sendCommand(CMD_RESET);
-        TimeControl::delayMs(1);
+        tc::delayMs(1);
         initialized_ = false;
     }
 
@@ -190,12 +190,12 @@ namespace ungula::loadcell {
     // ---- Internal helpers ----
 
     bool ADS1220::waitReadyUntil(uint32_t timeoutMs, uint32_t pollDelayMs) const {
-        const TimeControl::tick_ms_t start = TimeControl::millis();
-        while ((TimeControl::millis() - start) < timeoutMs) {
+        const tc::tick_ms_t start = tc::millis();
+        while ((tc::millis() - start) < timeoutMs) {
             if (isReady()) {
                 return true;
             }
-            TimeControl::delayMs(pollDelayMs);
+            tc::delayMs(pollDelayMs);
         }
         return false;
     }

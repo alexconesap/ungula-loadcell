@@ -9,7 +9,7 @@
 
 namespace ungula::loadcell {
 
-    using ungula::core::time::TimeControl;
+    namespace tc = ungula::core::time;
 
     bool LoadCell::captureZero(uint8_t sampleCount, uint32_t timeoutPerSampleMs) {
         if (sampleCount == 0U) {
@@ -25,7 +25,7 @@ namespace ungula::loadcell {
             }
             sum += raw;
 
-            TimeControl::yield();
+            tc::yield();
         }
 
         offset_ = static_cast<int32_t>(sum / sampleCount);

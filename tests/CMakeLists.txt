@@ -15,7 +15,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 # ---------------------------------------------------------------------------
-# Dependencies: UngulaCore (TimeControl stub hooks).
+# Dependencies: UngulaCore (the time API stub hooks).
 #
 # By default we use sibling directory ../../lib which is the layout during
 # local development. External consumers can set -DUSE_LOCAL_DEPS=OFF to fetch
