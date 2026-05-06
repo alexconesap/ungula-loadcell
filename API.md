@@ -8,7 +8,7 @@ unit helpers (`force_convert.h`). Pick the chip at construction; the
 rest of the code does not change.
 
 All public symbols live in namespace `ungula`. Activate the library
-with a single include: `#include <ungula_loadcell.h>`.
+with a single include: `#include <ungula/loadcell.h>`.
 
 ---
 
@@ -18,15 +18,15 @@ with a single include: `#include <ungula_loadcell.h>`.
 
 ```cpp
 #include <Arduino.h>
-#include <ungula_loadcell.h>
+#include <ungula/loadcell.h>
 
-using ungula::LoadCell;
+using ungula::loadcell::LoadCell;
 
-ungula::HX711 adc;
+ungula::loadcell::HX711 adc;
 LoadCell cell(adc);
 
 void setup() {
-    adc.begin(/*dataPin=*/4, /*clockPin=*/5, ungula::HX711::InputConfig::A128);
+    adc.begin(/*dataPin=*/4, /*clockPin=*/5, ungula::loadcell::HX711::InputConfig::A128);
 
     // 1) Capture zero with no load on the cell.
     cell.captureZero(/*sampleCount=*/16, /*timeoutPerSampleMs=*/1000);
@@ -51,17 +51,17 @@ When to use this: simplest path. HX711 is GPIO bit-bang, no bus needed.
 
 ```cpp
 #include <Arduino.h>
-#include <ungula_loadcell.h>
+#include <ungula/loadcell.h>
 
-ungula::i2c::I2cMaster bus(0);
-ungula::NAU7802 adc;
-ungula::LoadCell cell(adc);
+ungula::hal::i2c::I2cMaster bus(0);
+ungula::loadcell::NAU7802 adc;
+ungula::loadcell::LoadCell cell(adc);
 
 void setup() {
     bus.begin(/*sda=*/21, /*scl=*/22, /*hz=*/400000);
     adc.begin(bus);
-    adc.setGain(ungula::NAU7802::Gain::X128);
-    adc.setSampleRate(ungula::NAU7802::SampleRate::SPS_80);
+    adc.setGain(ungula::loadcell::NAU7802::Gain::X128);
+    adc.setSampleRate(ungula::loadcell::NAU7802::SampleRate::SPS_80);
     adc.calibrateAfe();          // run after gain / channel / rate changes
 
     cell.captureZero(16, 1000);
@@ -70,7 +70,7 @@ void setup() {
 
 void loop() {
     float n = 0.0F;
-    if (cell.readWithin(n, 50, 1, ungula::LoadCell::ForceUnit::NEWTONS)) {
+    if (cell.readWithin(n, 50, 1, ungula::loadcell::LoadCell::ForceUnit::NEWTONS)) {
         // use n
     }
 }
@@ -82,20 +82,20 @@ When to use this: I2C bridge sensor with on-chip PGA / LDO.
 
 ```cpp
 #include <Arduino.h>
-#include <ungula_loadcell.h>
+#include <ungula/loadcell.h>
 
-ungula::spi::SpiMaster spi;
-ungula::ADS1220 adc;
-ungula::LoadCell cell(adc);
+ungula::hal::spi::SpiMaster spi;
+ungula::loadcell::ADS1220 adc;
+ungula::loadcell::LoadCell cell(adc);
 
 void setup() {
     spi.begin(/*sclk=*/18, /*miso=*/19, /*mosi=*/23, /*cs=*/5,
               /*hz=*/1000000, /*mode=*/1);
     adc.begin(spi, /*drdyPin=*/22);
-    adc.setMux(ungula::ADS1220::Mux::AIN0_AIN1);
-    adc.setGain(ungula::ADS1220::Gain::X128);
-    adc.setDataRate(ungula::ADS1220::DataRate::SPS_20);
-    adc.setConversionMode(ungula::ADS1220::ConversionMode::CONTINUOUS);
+    adc.setMux(ungula::loadcell::ADS1220::Mux::AIN0_AIN1);
+    adc.setGain(ungula::loadcell::ADS1220::Gain::X128);
+    adc.setDataRate(ungula::loadcell::ADS1220::DataRate::SPS_20);
+    adc.setConversionMode(ungula::loadcell::ADS1220::ConversionMode::CONTINUOUS);
 
     cell.captureZero(16, 1000);
 }
@@ -114,10 +114,10 @@ When to use this: ratiometric bridge, IDAC, SPI bus already present.
 
 ```cpp
 #include <Arduino.h>
-#include <ungula_loadcell.h>
+#include <ungula/loadcell.h>
 
-ungula::ADS1232 adc;
-ungula::LoadCell cell(adc);
+ungula::loadcell::ADS1232 adc;
+ungula::loadcell::LoadCell cell(adc);
 
 void setup() {
     // Tie SPEED, A0, GAIN0/1, TEMP externally — pass GPIO_NONE to leave them.
@@ -130,7 +130,7 @@ void setup() {
 
 void loop() {
     float kgf = 0.0F;
-    if (cell.readIfReady(kgf, ungula::LoadCell::ForceUnit::KGF)) { /* ... */ }
+    if (cell.readIfReady(kgf, ungula::loadcell::LoadCell::ForceUnit::KGF)) { /* ... */ }
 }
 ```
 
@@ -138,22 +138,22 @@ void loop() {
 
 ```cpp
 #include <Arduino.h>
-#include <ungula_loadcell.h>
+#include <ungula/loadcell.h>
 
-ungula::HX711 adc;
-ungula::LoadCell cell(adc);
-ungula::TensionSensor tension(cell);
+ungula::loadcell::HX711 adc;
+ungula::loadcell::LoadCell cell(adc);
+ungula::loadcell::TensionSensor tension(cell);
 
 void setup() {
     adc.begin(4, 5);
     cell.captureZero(16, 1000);
     cell.setCountsPerNewton(420.0F);
 
-    ungula::TensionSensor::Config cfg{};
+    ungula::loadcell::TensionSensor::Config cfg{};
     cfg.averageSamples = 8;
     cfg.stabilityTolerance = 0.05F;     // Newtons
     cfg.targetTolerance = 0.10F;
-    cfg.unit = ungula::LoadCell::ForceUnit::NEWTONS;
+    cfg.unit = ungula::loadcell::LoadCell::ForceUnit::NEWTONS;
     tension.configure(cfg);
 
     tension.setTarget(2.5F);            // 2.5 N target
@@ -180,7 +180,7 @@ noisy and you need a debounced "is it stable / on target" signal.
 ### Use case: Safe working tension from material properties
 
 ```cpp
-#include <ungula_loadcell.h>
+#include <ungula/loadcell.h>
 
 using namespace ungula::force;
 
@@ -198,23 +198,23 @@ yield strength and wire diameter.
 
 ## API
 
-### Header: `<ungula_loadcell.h>`
+### Header: `<ungula/loadcell.h>`
 
-Single include. Pulls `<ungula_hal.h>` and `<ungula_core.h>` first
+Single include. Pulls `<ungula/hal.h>` and `<ungula/core.h>` first
 (needed for Arduino CLI library discovery), then every public header in
 the loadcell tree:
 
-- `loadcell/i_adc24.h`
-- `loadcell/drivers/{hx711,ads1220,ads1232,nau7802}.h`
-- `loadcell/load_cell.h`
-- `loadcell/tension_sensor.h`
-- `loadcell/force_convert.h`
+- `ungula/loadcell/i_adc24.h`
+- `ungula/loadcell/drivers/{hx711,ads1220,ads1232,nau7802}.h`
+- `ungula/loadcell/load_cell.h`
+- `ungula/loadcell/tension_sensor.h`
+- `ungula/loadcell/force_convert.h`
 
 ---
 
 ## Public types
 
-### `ungula::IAdc24` (abstract)
+### `ungula::loadcell::IAdc24` (abstract)
 
 Chip-neutral interface for 24-bit signed delta-sigma ADCs. All concrete
 drivers implement it. `LoadCell` and `TensionSensor` only see this
@@ -234,7 +234,7 @@ Methods (all pure virtual):
   post-wake sample.
 - `void reset()` — return chip to default config.
 
-### `ungula::HX711 : IAdc24`
+### `ungula::loadcell::HX711 : IAdc24`
 
 GPIO bit-bang, two pins (data, clock). Gain / channel selection via
 extra clock pulses after the 24-bit read.
@@ -250,13 +250,13 @@ extra clock pulses after the 24-bit read.
 - `void reset() override;` — equivalent to `powerDown()` + `powerUp()`;
   returns to A128 defaults.
 
-### `ungula::NAU7802 : IAdc24`
+### `ungula::loadcell::NAU7802 : IAdc24`
 
 I2C bridge ADC. Fixed address `NAU7802::I2C_ADDR == 0x2A`.
 
 - Enums: `Gain { X1..X128 }`, `SampleRate { SPS_10, SPS_20, SPS_40,
   SPS_80, SPS_320 }`, `LdoVoltage { V_4_5..V_2_4 }`, `Channel { CH1, CH2 }`.
-- `bool begin(ungula::i2c::I2cMaster& bus);` — bus must outlive driver.
+- `bool begin(ungula::hal::i2c::I2cMaster& bus);` — bus must outlive driver.
 - `void setGain(Gain);`
 - `void setSampleRate(SampleRate);`
 - `void setLdoVoltage(LdoVoltage);`
@@ -264,7 +264,7 @@ I2C bridge ADC. Fixed address `NAU7802::I2C_ADDR == 0x2A`.
 - `bool calibrateAfe();` — internal offset cal, blocks up to ~1 s. Run
   after changing gain / channel / rate.
 
-### `ungula::ADS1220 : IAdc24`
+### `ungula::loadcell::ADS1220 : IAdc24`
 
 SPI bridge ADC, mode 1 (CPOL=0, CPHA=1), MSB first. DRDY on a separate
 GPIO (active low).
@@ -273,7 +273,7 @@ GPIO (active low).
   `DataRate { SPS_20, SPS_45, SPS_90, SPS_175, SPS_330, SPS_600,
   SPS_1000 }`, `VoltageRef { INTERNAL_2V048, REFP0_REFN0, AIN0_AIN3,
   AVDD_AVSS }`, `ConversionMode { SINGLE_SHOT, CONTINUOUS }`.
-- `bool begin(ungula::spi::SpiMaster& spi, uint8_t drdyPin);`
+- `bool begin(ungula::hal::spi::SpiMaster& spi, uint8_t drdyPin);`
 - `void setGain(Gain);` `void setMux(Mux);` `void setDataRate(DataRate);`
 - `void setVoltageRef(VoltageRef);`
 - `void setConversionMode(ConversionMode);`
@@ -281,7 +281,7 @@ GPIO (active low).
 - `void setPgaBypass(bool bypass);`
 - `void startConversion();` — required after each read in `SINGLE_SHOT`.
 
-### `ungula::ADS1232 : IAdc24`
+### `ungula::loadcell::ADS1232 : IAdc24`
 
 GPIO bit-bang ADC. Read is 25 SCLK pulses (24 data + 1 ack); 26 pulses
 trigger self-offset calibration. Hardware control pins are optional —
@@ -300,7 +300,7 @@ tied externally.
 - `bool selfCalibrate(uint32_t timeoutMs = 2000);` — blocks ~800 ms at
   10 SPS.
 
-### `ungula::LoadCell`
+### `ungula::loadcell::LoadCell`
 
 Chip-agnostic load-cell semantics on top of any `IAdc24`. Stores
 calibration state (offset and counts-per-Newton); the canonical internal
@@ -342,7 +342,7 @@ Escape hatch:
 - `IAdc24& adc();` / `const IAdc24& adc() const;` — for raw reads, power
   control, chip-specific config.
 
-### `ungula::TensionSensor`
+### `ungula::loadcell::TensionSensor`
 
 Filtered tension on top of a `LoadCell`. EMA smoothing, stability
 detection, target tracking. State (last raw, filtered, previous
@@ -373,7 +373,7 @@ filtered, target, stable flag) starts as `NAN` until the first sample.
 - `bool isAtTarget() const;` — `|filtered - target| <= targetTolerance`.
 - `bool isAboveTarget() const;` / `bool isBelowTarget() const;`
 
-### `ungula::force::*` (header-only, in `force_convert.h`)
+### `ungula::loadcell::force::*` (header-only, in `force_convert.h`)
 
 Free functions, all `inline float`. No state.
 
@@ -445,7 +445,7 @@ No exceptions, no error codes — boolean returns and `NAN` sentinels.
 
 ## Threading / timing / hardware notes
 
-- All time / delay calls go through `ungula::TimeControl` (project
+- All time / delay calls go through `ungula::core::time::TimeControl` (project
   rule). Do not call `millis()` / `delay()` directly when extending or
   composing this library.
 - Bit-bang drivers (HX711, ADS1232) take a critical section on ESP32

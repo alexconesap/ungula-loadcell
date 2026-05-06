@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include <loadcell/load_cell.h>
+#include <ungula/loadcell/load_cell.h>
 
 #include <cmath>
 
@@ -12,7 +12,7 @@
 
 namespace {
 
-    using ungula::LoadCell;
+    using ungula::loadcell::LoadCell;
     using MU = LoadCell::ForceUnit;
 
     // Standard gravity used inside LoadCell — duplicated here to cross-check math.

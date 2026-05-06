@@ -3,13 +3,13 @@
 
 #include <gtest/gtest.h>
 
-#include <loadcell/force_convert.h>
+#include <ungula/loadcell/force_convert.h>
 
 #include <cmath>
 
 namespace {
 
-    using namespace ungula::force;
+    using namespace ungula::loadcell::force;
 
     // ---- Force conversions ----
 

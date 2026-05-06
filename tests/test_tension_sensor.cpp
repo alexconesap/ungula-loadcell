@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include <loadcell/tension_sensor.h>
+#include <ungula/loadcell/tension_sensor.h>
 
 #include <cmath>
 
@@ -11,8 +11,8 @@
 
 namespace {
 
-    using ungula::LoadCell;
-    using ungula::TensionSensor;
+    using ungula::loadcell::LoadCell;
+    using ungula::loadcell::TensionSensor;
     using FU = LoadCell::ForceUnit;
 
     constexpr float kCountsPerNewton = 1000.0F;

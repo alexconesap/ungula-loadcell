@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <loadcell/i_adc24.h>
+#include <ungula/loadcell/i_adc24.h>
 
 #include <cstddef>
 #include <vector>
@@ -11,7 +11,7 @@
 // Scripted IAdc24 mock. Pre-populate a queue of raw values — each readRawIfReady /
 // readRawWithin call pops the next value. When the queue empties the mock reports
 // "not ready" or times out. Power management / reset are counted for inspection.
-class MockAdc24 : public ungula::IAdc24 {
+class MockAdc24 : public ungula::loadcell::IAdc24 {
     public:
         bool isInitialized() const override {
             return initialized_;

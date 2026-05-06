@@ -58,10 +58,10 @@ The library is split into two layers so you can swap the 24-bit ADC chip without
 
 | Chip | Bus | Gain | Data rate | Driver class |
 | ---- | --- | ---- | --------- | ------------ |
-| HX711 | GPIO bit-bang | 32, 64, 128 (via extra pulses) | 10/80 SPS | `ungula::HX711` |
-| NAU7802 | I2C (0x2A) | 1–128 (register) | 10–320 SPS | `ungula::NAU7802` |
-| ADS1220 | SPI (mode 1) | 1–128 (register) | 20–1000 SPS | `ungula::ADS1220` |
-| ADS1232 | GPIO bit-bang | 1, 2, 64, 128 (GAIN0/GAIN1 pins) | 10/80 SPS | `ungula::ADS1232` |
+| HX711 | GPIO bit-bang | 32, 64, 128 (via extra pulses) | 10/80 SPS | `ungula::loadcell::HX711` |
+| NAU7802 | I2C (0x2A) | 1–128 (register) | 10–320 SPS | `ungula::loadcell::NAU7802` |
+| ADS1220 | SPI (mode 1) | 1–128 (register) | 20–1000 SPS | `ungula::loadcell::ADS1220` |
+| ADS1232 | GPIO bit-bang | 1, 2, 64, 128 (GAIN0/GAIN1 pins) | 10/80 SPS | `ungula::loadcell::ADS1232` |
 
 All four expose the same `IAdc24` surface. Pick the chip at construction time and the rest of the code stays unchanged.
 
@@ -73,12 +73,12 @@ All four expose the same `IAdc24` surface. Pick the chip at construction time an
 ## Quick Start
 
 ```cpp
-#include <ungula_loadcell.h>
+#include <ungula/loadcell.h>
 
-using MU = ungula::LoadCell::ForceUnit;
+using MU = ungula::loadcell::LoadCell::ForceUnit;
 
-ungula::HX711 adc;
-ungula::LoadCell cell(adc);  // wire the load-cell layer on top of the HX711
+ungula::loadcell::HX711 adc;
+ungula::loadcell::LoadCell cell(adc);  // wire the load-cell layer on top of the HX711
 
 void setup() {
   // Data on GPIO 16, Clock on GPIO 4, default gain A128
@@ -109,31 +109,31 @@ After construction, every chip speaks the same `IAdc24` dialect, and `LoadCell` 
 
 ```cpp
 // Option 1 — HX711 (GPIO bit-bang)
-ungula::HX711 hx;
+ungula::loadcell::HX711 hx;
 hx.begin(dataPin, clockPin);
-ungula::LoadCell cell(hx);
+ungula::loadcell::LoadCell cell(hx);
 
 // Option 2 — NAU7802 on I2C
-ungula::i2c::I2cMaster i2cBus(0);
+ungula::hal::i2c::I2cMaster i2cBus(0);
 i2cBus.begin(sdaPin, sclPin, 400000);
-ungula::NAU7802 nau;
+ungula::loadcell::NAU7802 nau;
 nau.begin(i2cBus);
-nau.setGain(ungula::NAU7802::Gain::X128);
-ungula::LoadCell cell(nau);
+nau.setGain(ungula::loadcell::NAU7802::Gain::X128);
+ungula::loadcell::LoadCell cell(nau);
 
 // Option 3 — ADS1220 on SPI with DRDY
-ungula::spi::SpiMaster spiBus;
+ungula::hal::spi::SpiMaster spiBus;
 spiBus.begin(sclkPin, misoPin, mosiPin, csPin, 1000000, 1);
-ungula::ADS1220 ads;
+ungula::loadcell::ADS1220 ads;
 ads.begin(spiBus, drdyPin);
-ads.setGain(ungula::ADS1220::Gain::X128);
-ungula::LoadCell cell(ads);
+ads.setGain(ungula::loadcell::ADS1220::Gain::X128);
+ungula::loadcell::LoadCell cell(ads);
 
 // Option 4 — ADS1232 (GPIO bit-bang, hardware gain)
-ungula::ADS1232 ads32;
+ungula::loadcell::ADS1232 ads32;
 ads32.begin(doutPin, sclkPin, pdwnPin, speedPin, a0Pin, gain0Pin, gain1Pin, tempPin);
-ads32.setGain(ungula::ADS1232::Gain::X128);
-ungula::LoadCell cell(ads32);
+ads32.setGain(ungula::loadcell::ADS1232::Gain::X128);
+ungula::loadcell::LoadCell cell(ads32);
 ```
 
 The `LoadCell` API is identical across all four.
@@ -165,7 +165,7 @@ Three options, depending on what calibration tool you have.
 Place a known weight on the load cell (e.g. a 2 kg calibration weight), read the raw ADC value, then tell the driver what weight that was:
 
 ```cpp
-using MU = ungula::LoadCell::ForceUnit;
+using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 int32_t rawAtForce = 0;
 if (adc.readRawWithin(rawAtForce, 2000, 0)) {
@@ -181,7 +181,7 @@ The library converts kg to Newtons internally using the standard gravity constan
 If you have a force gauge or electronic crane scale that reads in Newtons:
 
 ```cpp
-using MU = ungula::LoadCell::ForceUnit;
+using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 int32_t rawAtForce = 0;
 if (adc.readRawWithin(rawAtForce, 2000, 0)) {
@@ -195,7 +195,7 @@ if (adc.readRawWithin(rawAtForce, 2000, 0)) {
 If you already know the scale factor from a previous calibration session:
 
 ```cpp
-using MU = ungula::LoadCell::ForceUnit;
+using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 // Counts per kg — from a previous calibration
 cell.setCountsPerKgf(4500.0F);
@@ -211,7 +211,7 @@ Both calls produce the same internal state. `LoadCell` always stores the factor 
 After calibration, read in any unit. The library converts internally:
 
 ```cpp
-using MU = ungula::LoadCell::ForceUnit;
+using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 float newtons = 0.0F;
 float kilograms = 0.0F;
@@ -230,7 +230,7 @@ cell.readWithin(kilograms, 500, 0, MU::KGF);
 If you cache raw readings and need to convert them later:
 
 ```cpp
-using MU = ungula::LoadCell::ForceUnit;
+using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 int32_t raw = 0;
 adc.readRawIfReady(raw);
@@ -259,10 +259,10 @@ The HX711 supports three input modes, accessed through the concrete `HX711` clas
 
 ```cpp
 // Set at initialization
-adc.begin(dataPin, clockPin, ungula::HX711::InputConfig::A64);
+adc.begin(dataPin, clockPin, ungula::loadcell::HX711::InputConfig::A64);
 
 // Change at runtime (first sample after change is discarded automatically)
-adc.setInputConfig(ungula::HX711::InputConfig::B32);
+adc.setInputConfig(ungula::loadcell::HX711::InputConfig::B32);
 ```
 
 ## Raw reads (uncalibrated)
@@ -300,7 +300,7 @@ adc.reset();                    // chip-specific reset — returns to defaults
 Save offset and scale to NVS or EEPROM for use across reboots. `countsPerNewton()` always returns the canonical counts-per-Newton value, regardless of the unit used during calibration:
 
 ```cpp
-using MU = ungula::LoadCell::ForceUnit;
+using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 // Save
 int32_t savedOffset = cell.offset();
@@ -314,7 +314,7 @@ cell.setCountsPerNewton(savedScale);
 ## Polling Pattern (Typical Embedded Loop)
 
 ```cpp
-using MU = ungula::LoadCell::ForceUnit;
+using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 void loop() {
   float kg = 0.0F;
@@ -336,18 +336,18 @@ void loop() {
 `TensionSensor` wraps a `LoadCell` and adds exponential moving average (EMA) filtering, stability detection, and target comparison with configurable tolerance bands. It keeps the filtering and "am I close enough?" logic in one place instead of spreading it across every caller.
 
 ```cpp
-#include <ungula_loadcell.h>
+#include <ungula/loadcell.h>
 
-using FU = ungula::LoadCell::ForceUnit;
+using FU = ungula::loadcell::LoadCell::ForceUnit;
 
-ungula::HX711 adc;
-ungula::LoadCell cell(adc);
+ungula::loadcell::HX711 adc;
+ungula::loadcell::LoadCell cell(adc);
 
 // ... adc.begin(), cell.captureZero(), cell.setCountsPerKgf() ...
 
-ungula::TensionSensor tension(cell);
+ungula::loadcell::TensionSensor tension(cell);
 
-ungula::TensionSensor::Config cfg;
+ungula::loadcell::TensionSensor::Config cfg;
 cfg.averageSamples = 8;
 cfg.stabilityTolerance = 0.03F;   // kgf
 cfg.targetTolerance = 0.02F;      // kgf
@@ -438,7 +438,7 @@ safe force (N) = yield stress (MPa) × cross-section area (mm²) × safety facto
 The datasheet says yield strength is 215 MPa. No "max tension" is given — you compute it.
 
 ```cpp
-#include <loadcell/force_convert.h>
+#include <ungula/loadcell/force_convert.h>
 
 using namespace ungula::force;
 

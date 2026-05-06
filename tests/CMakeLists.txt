@@ -54,7 +54,7 @@ include_directories(
 add_executable(test_ungula_loadcell
     test_load_cell.cpp
 
-    ${LIB_LOADCELL_SRC}/loadcell/load_cell.cpp
+    ${LIB_LOADCELL_SRC}/ungula/loadcell/load_cell.cpp
 )
 target_link_libraries(test_ungula_loadcell gtest_main)
 
@@ -66,12 +66,12 @@ target_link_libraries(test_ungula_loadcell gtest_main)
 add_executable(test_ungula_drivers
     test_drivers.cpp
 
-    ${LIB_LOADCELL_SRC}/loadcell/drivers/hx711.cpp
-    ${LIB_LOADCELL_SRC}/loadcell/drivers/nau7802.cpp
-    ${LIB_LOADCELL_SRC}/loadcell/drivers/ads1220.cpp
-    ${LIB_LOADCELL_SRC}/loadcell/drivers/ads1232.cpp
-    ${LIB_HAL_SRC}/hal/i2c/platforms/i2c_master_default.cpp
-    ${LIB_HAL_SRC}/hal/spi/platforms/spi_master_default.cpp
+    ${LIB_LOADCELL_SRC}/ungula/loadcell/drivers/hx711.cpp
+    ${LIB_LOADCELL_SRC}/ungula/loadcell/drivers/nau7802.cpp
+    ${LIB_LOADCELL_SRC}/ungula/loadcell/drivers/ads1220.cpp
+    ${LIB_LOADCELL_SRC}/ungula/loadcell/drivers/ads1232.cpp
+    ${LIB_HAL_SRC}/ungula/hal/i2c/platforms/i2c_master_default.cpp
+    ${LIB_HAL_SRC}/ungula/hal/spi/platforms/spi_master_default.cpp
 )
 target_link_libraries(test_ungula_drivers gtest_main)
 
@@ -82,8 +82,8 @@ target_link_libraries(test_ungula_drivers gtest_main)
 add_executable(test_ungula_tension
     test_tension_sensor.cpp
 
-    ${LIB_LOADCELL_SRC}/loadcell/load_cell.cpp
-    ${LIB_LOADCELL_SRC}/loadcell/tension_sensor.cpp
+    ${LIB_LOADCELL_SRC}/ungula/loadcell/load_cell.cpp
+    ${LIB_LOADCELL_SRC}/ungula/loadcell/tension_sensor.cpp
 )
 target_link_libraries(test_ungula_tension gtest_main)
 

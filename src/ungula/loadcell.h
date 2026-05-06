@@ -12,23 +12,23 @@
 
 // Depend on UngulaCore and UngulaHal — must be included first so
 // Arduino CLI discovers their include paths before our headers reference them.
-#include <ungula_core.h>
-#include <ungula_hal.h>
+#include <ungula/core.h>
+#include <ungula/hal.h>
 
 // Chip-neutral interface (implemented by every concrete ADC driver)
-#include "loadcell/i_adc24.h"
+#include "ungula/loadcell/i_adc24.h"
 
 // Concrete ADC drivers
-#include "loadcell/drivers/ads1220.h"
-#include "loadcell/drivers/ads1232.h"
-#include "loadcell/drivers/hx711.h"
-#include "loadcell/drivers/nau7802.h"
+#include "ungula/loadcell/drivers/ads1220.h"
+#include "ungula/loadcell/drivers/ads1232.h"
+#include "ungula/loadcell/drivers/hx711.h"
+#include "ungula/loadcell/drivers/nau7802.h"
 
 // Chip-neutral load-cell semantics (calibration, offset, unit conversion)
-#include "loadcell/load_cell.h"
+#include "ungula/loadcell/load_cell.h"
 
 // Filtered tension reading with stability detection and target tracking
-#include "loadcell/tension_sensor.h"
+#include "ungula/loadcell/tension_sensor.h"
 
 // Force/stress unit conversions and safe working tension calculator
-#include "loadcell/force_convert.h"
+#include "ungula/loadcell/force_convert.h"
