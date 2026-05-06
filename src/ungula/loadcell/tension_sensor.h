@@ -11,90 +11,89 @@
 
 namespace ungula::loadcell {
 
+    class TensionSensor {
+        public:
+            using ForceUnit = LoadCell::ForceUnit;
 
-class TensionSensor {
-    public:
-        using ForceUnit = LoadCell::ForceUnit;
+            struct Config {
+                    uint8_t averageSamples = 8;
+                    float stabilityTolerance = 0.05F;
+                    float targetTolerance = 0.05F;
+                    ForceUnit unit = ForceUnit::NEWTONS;
+            };
 
-        struct Config {
-                uint8_t averageSamples = 8;
-                float stabilityTolerance = 0.05F;
-                float targetTolerance = 0.05F;
-                ForceUnit unit = ForceUnit::NEWTONS;
-        };
+            explicit TensionSensor(LoadCell& loadCell) : loadCell_(loadCell) {}
 
-        explicit TensionSensor(LoadCell& loadCell) : loadCell_(loadCell) {}
-
-        void configure(const Config& config) {
-            config_ = config;
-        }
-
-        bool readInstant(float& outTension);
-        bool readStable(float& outTension, uint32_t timeoutMs, uint32_t pollDelayMs = 0);
-
-        bool isStable() const {
-            return stable_;
-        }
-        float lastTension() const {
-            return lastTension_;
-        }
-        float filteredTension() const {
-            return filteredTension_;
-        }
-
-        float lastVariation() const {
-            if (std::isnan(filteredTension_) || std::isnan(previousFilteredTension_)) {
-                return NAN;
+            void configure(const Config& config) {
+                config_ = config;
             }
-            return filteredTension_ - previousFilteredTension_;
-        }
 
-        void setTarget(float target) {
-            target_ = target;
-        }
-        float target() const {
-            return target_;
-        }
+            bool readInstant(float& outTension);
+            bool readStable(float& outTension, uint32_t timeoutMs, uint32_t pollDelayMs = 0);
 
-        float errorToTarget() const {
-            if (std::isnan(filteredTension_) || std::isnan(target_)) {
-                return NAN;
+            bool isStable() const {
+                return stable_;
             }
-            return filteredTension_ - target_;
-        }
-
-        bool isAtTarget() const {
-            if (std::isnan(filteredTension_) || std::isnan(target_)) {
-                return false;
+            float lastTension() const {
+                return lastTension_;
             }
-            return std::fabs(filteredTension_ - target_) <= config_.targetTolerance;
-        }
-
-        bool isAboveTarget() const {
-            if (std::isnan(filteredTension_) || std::isnan(target_)) {
-                return false;
+            float filteredTension() const {
+                return filteredTension_;
             }
-            return filteredTension_ > (target_ + config_.targetTolerance);
-        }
 
-        bool isBelowTarget() const {
-            if (std::isnan(filteredTension_) || std::isnan(target_)) {
-                return false;
+            float lastVariation() const {
+                if (std::isnan(filteredTension_) || std::isnan(previousFilteredTension_)) {
+                    return NAN;
+                }
+                return filteredTension_ - previousFilteredTension_;
             }
-            return filteredTension_ < (target_ - config_.targetTolerance);
-        }
 
-    private:
-        void updateFiltered(float sample);
+            void setTarget(float target) {
+                target_ = target;
+            }
+            float target() const {
+                return target_;
+            }
 
-        LoadCell& loadCell_;
-        Config config_{};
+            float errorToTarget() const {
+                if (std::isnan(filteredTension_) || std::isnan(target_)) {
+                    return NAN;
+                }
+                return filteredTension_ - target_;
+            }
 
-        float lastTension_ = NAN;
-        float filteredTension_ = NAN;
-        float previousFilteredTension_ = NAN;
-        float target_ = NAN;
-        bool stable_ = false;
-};
+            bool isAtTarget() const {
+                if (std::isnan(filteredTension_) || std::isnan(target_)) {
+                    return false;
+                }
+                return std::fabs(filteredTension_ - target_) <= config_.targetTolerance;
+            }
+
+            bool isAboveTarget() const {
+                if (std::isnan(filteredTension_) || std::isnan(target_)) {
+                    return false;
+                }
+                return filteredTension_ > (target_ + config_.targetTolerance);
+            }
+
+            bool isBelowTarget() const {
+                if (std::isnan(filteredTension_) || std::isnan(target_)) {
+                    return false;
+                }
+                return filteredTension_ < (target_ - config_.targetTolerance);
+            }
+
+        private:
+            void updateFiltered(float sample);
+
+            LoadCell& loadCell_;
+            Config config_{};
+
+            float lastTension_ = NAN;
+            float filteredTension_ = NAN;
+            float previousFilteredTension_ = NAN;
+            float target_ = NAN;
+            bool stable_ = false;
+    };
 
 }  // namespace ungula::loadcell
