@@ -74,6 +74,7 @@ All four expose the same `IAdc24` surface. Pick the chip at construction time an
 
 ```cpp
 #include <ungula/loadcell.h>
+#include <emblogx/logger.h>
 
 using MU = ungula::loadcell::LoadCell::ForceUnit;
 
@@ -108,6 +109,8 @@ The **construction** of the ADC is chip-specific and always will be — GPIO pin
 After construction, every chip speaks the same `IAdc24` dialect, and `LoadCell` does not care which one it is driving behind the hood.
 
 ```cpp
+#include <ungula/loadcell.h>
+
 // Option 1 — HX711 (GPIO bit-bang)
 ungula::loadcell::HX711 hx;
 hx.begin(dataPin, clockPin);
@@ -152,6 +155,8 @@ Calibration requires two steps:
 With nothing on the load cell:
 
 ```cpp
+#include <ungula/loadcell.h>
+
 // Average 20 samples, 1 second timeout per sample
 cell.captureZero(20, 1000);
 ```
@@ -165,6 +170,8 @@ Three options, depending on what calibration tool you have.
 Place a known weight on the load cell (e.g. a 2 kg calibration weight), read the raw ADC value, then tell the driver what weight that was:
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 int32_t rawAtForce = 0;
@@ -181,6 +188,8 @@ The library converts kg to Newtons internally using the standard gravity constan
 If you have a force gauge or electronic crane scale that reads in Newtons:
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 int32_t rawAtForce = 0;
@@ -195,6 +204,8 @@ if (adc.readRawWithin(rawAtForce, 2000, 0)) {
 If you already know the scale factor from a previous calibration session:
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 // Counts per kg — from a previous calibration
@@ -211,6 +222,8 @@ Both calls produce the same internal state. `LoadCell` always stores the factor 
 After calibration, read in any unit. The library converts internally:
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 float newtons = 0.0F;
@@ -230,6 +243,8 @@ cell.readWithin(kilograms, 500, 0, MU::KGF);
 If you cache raw readings and need to convert them later:
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 int32_t raw = 0;
@@ -258,6 +273,8 @@ The HX711 supports three input modes, accessed through the concrete `HX711` clas
 | B32    | B       | 32x  | Second input channel                         |
 
 ```cpp
+#include <ungula/loadcell.h>
+
 // Set at initialization
 adc.begin(dataPin, clockPin, ungula::loadcell::HX711::InputConfig::A64);
 
@@ -270,6 +287,8 @@ adc.setInputConfig(ungula::loadcell::HX711::InputConfig::B32);
 For direct access to the 24-bit signed ADC value, bypassing calibration entirely, go through the driver:
 
 ```cpp
+#include <ungula/loadcell.h>
+
 int32_t raw = 0;
 
 // Non-blocking
@@ -286,6 +305,8 @@ if (adc.readRawWithin(raw, 1000, 0)) {
 ## Power management
 
 ```cpp
+#include <ungula/loadcell.h>
+
 adc.powerDown();                // chip enters low-power mode
 // ... do other work ...
 if (!adc.powerUp(500)) {        // blocks until the first sample is ready (up to 500 ms)
@@ -300,6 +321,8 @@ adc.reset();                    // chip-specific reset — returns to defaults
 Save offset and scale to NVS or EEPROM for use across reboots. `countsPerNewton()` always returns the canonical counts-per-Newton value, regardless of the unit used during calibration:
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 // Save
@@ -314,6 +337,8 @@ cell.setCountsPerNewton(savedScale);
 ## Polling Pattern (Typical Embedded Loop)
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using MU = ungula::loadcell::LoadCell::ForceUnit;
 
 void loop() {
@@ -360,6 +385,8 @@ tension.setTarget(0.85F);
 ### Reading and controlling
 
 ```cpp
+#include <ungula/loadcell.h>
+
 void loop() {
   float current = 0.0F;
   if (tension.readStable(current, 200, 1)) {
@@ -457,6 +484,8 @@ tension.setTarget(safeKgf);                          // 1.29 kgf
 Nitinol is much stronger but you want a wider safety margin because it's used in medical catheters.
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using namespace ungula::force;
 
 // Nitinol, yield ~500 MPa, 0.3 mm diameter, 25% safety margin
@@ -472,6 +501,8 @@ tension.setTarget(safeN);                            // 8.84 N
 Some US suppliers specify yield in psi and diameter in inches.
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using namespace ungula::force;
 
 // 304 SS, yield 31200 psi, diameter 0.020", safety 30%
@@ -485,6 +516,8 @@ tension.setTarget(safeLbf);
 ### Example 4 — Comparing materials side by side
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using namespace ungula::force;
 
 // Same diameter (0.5 mm), same safety factor (30%), different materials
@@ -502,6 +535,8 @@ float tungstenSafe = safeTensionN(1500.0F, 0.5F, 0.15F);  // -> 44.18 N
 The conversion functions are useful on their own, independent of the calculator.
 
 ```cpp
+#include <ungula/loadcell.h>
+
 using namespace ungula::force;
 
 // The machine reads 2.5 N — what is that in lbf?
