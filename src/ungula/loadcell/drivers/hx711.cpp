@@ -12,17 +12,19 @@
 #include "freertos/portmacro.h"
 #endif
 
-namespace ungula::loadcell {
+namespace ungula::loadcell
+{
 
     using namespace ungula::hal;
     namespace tc = ungula::core::time;
 
-    namespace {
+    namespace
+    {
 #if defined(ESP_PLATFORM)
         // Protect the HX711 read sequence from interruption.
         portMUX_TYPE g_hx711Mux = portMUX_INITIALIZER_UNLOCKED;
 #endif
-    }  // namespace
+    } // namespace
 
     // After reading the 24-bit value from the HX711, we must send extra clock pulses
     // to tell the chip "which channel and gain to use for the NEXT conversion". This is the way the
@@ -31,20 +33,22 @@ namespace ungula::loadcell {
     // A128 -> 1 pulse
     // B32  -> 2 pulses
     // A64  -> 3 pulses
-    uint8_t HX711::configToPulseCount(InputConfig config) {
+    uint8_t HX711::configToPulseCount(InputConfig config)
+    {
         switch (config) {
-            case InputConfig::A128:
-                return 1U;
-            case InputConfig::A64:
-                return 3U;
-            case InputConfig::B32:
-                return 2U;
-            default:
-                return 1U;
+        case InputConfig::A128:
+            return 1U;
+        case InputConfig::A64:
+            return 3U;
+        case InputConfig::B32:
+            return 2U;
+        default:
+            return 1U;
         }
     }
 
-    uint8_t HX711::shiftInByteMsbFirst(uint8_t dataPin, uint8_t clockPin) {
+    uint8_t HX711::shiftInByteMsbFirst(uint8_t dataPin, uint8_t clockPin)
+    {
         // Bit-banged byte read with fixed timing.
         uint8_t value = 0U;
 
@@ -64,10 +68,11 @@ namespace ungula::loadcell {
         return value;
     }
 
-    int32_t HX711::signExtend24(uint8_t b2, uint8_t b1, uint8_t b0) {
+    int32_t HX711::signExtend24(uint8_t b2, uint8_t b1, uint8_t b0)
+    {
         // Expand the chip 24-bit signed format into int32_t.
-        const uint32_t raw24 = (static_cast<uint32_t>(b2) << 16U) |
-                               (static_cast<uint32_t>(b1) << 8U) | static_cast<uint32_t>(b0);
+        const uint32_t raw24 = (static_cast<uint32_t>(b2) << 16U) | (static_cast<uint32_t>(b1) << 8U) |
+                               static_cast<uint32_t>(b0);
 
         if ((b2 & 0x80U) != 0U) {
             return static_cast<int32_t>(raw24 | 0xFF000000UL);
@@ -76,7 +81,8 @@ namespace ungula::loadcell {
         return static_cast<int32_t>(raw24);
     }
 
-    bool HX711::begin(uint8_t dataPin, uint8_t clockPin, InputConfig config) {
+    bool HX711::begin(uint8_t dataPin, uint8_t clockPin, InputConfig config)
+    {
         const bool okClock = gpio::configOutput(clockPin);
         const bool okData = gpio::configInput(dataPin);
 
@@ -96,16 +102,19 @@ namespace ungula::loadcell {
         return true;
     }
 
-    bool HX711::isInitialized() const {
+    bool HX711::isInitialized() const
+    {
         return initialized_;
     }
 
-    bool HX711::isReady() const {
+    bool HX711::isReady() const
+    {
         // DOUT goes low when a conversion is ready.
         return initialized_ && gpio::isLow(dataPin_);
     }
 
-    bool HX711::readRawIfReady(int32_t& outRaw) {
+    bool HX711::readRawIfReady(int32_t &outRaw)
+    {
         if (!isReady()) {
             return false;
         }
@@ -122,7 +131,8 @@ namespace ungula::loadcell {
         return true;
     }
 
-    bool HX711::readRawWithin(int32_t& outRaw, uint32_t timeoutMs, uint32_t pollDelayMs) {
+    bool HX711::readRawWithin(int32_t &outRaw, uint32_t timeoutMs, uint32_t pollDelayMs)
+    {
         while (true) {
             if (!waitReadyUntil(timeoutMs, pollDelayMs)) {
                 return false;
@@ -132,7 +142,7 @@ namespace ungula::loadcell {
 
             if (discardNextSample_) {
                 discardNextSample_ = false;
-                continue;  // discard first sample after config change
+                continue; // discard first sample after config change
             }
 
             outRaw = raw;
@@ -140,7 +150,8 @@ namespace ungula::loadcell {
         }
     }
 
-    void HX711::setInputConfig(InputConfig config) {
+    void HX711::setInputConfig(InputConfig config)
+    {
         if (config_ == config) {
             return;
         }
@@ -149,18 +160,21 @@ namespace ungula::loadcell {
         discardNextSample_ = true;
     }
 
-    HX711::InputConfig HX711::inputConfig() const {
+    HX711::InputConfig HX711::inputConfig() const
+    {
         return config_;
     }
 
-    void HX711::powerDown() {
+    void HX711::powerDown()
+    {
         // HX711 enters power-down when PD_SCK stays high for more than 60us (datasheet).
         // 70us gives a small margin.
         gpio::setHigh(clockPin_);
         tc::delayUs(70);
     }
 
-    bool HX711::powerUp(uint32_t readyTimeoutMs) {
+    bool HX711::powerUp(uint32_t readyTimeoutMs)
+    {
         // Bringing PD_SCK low wakes the chip. After wake the HX711 always returns to A128 mode
         // regardless of the previous configuration — keep our internal state consistent with that.
         gpio::setLow(clockPin_);
@@ -175,14 +189,16 @@ namespace ungula::loadcell {
         return waitReadyUntil(readyTimeoutMs, 5U);
     }
 
-    void HX711::reset() {
+    void HX711::reset()
+    {
         // HX711 has no reset register — power-cycle via the clock line and wait up to 500ms
         // for the first fresh sample.
         powerDown();
         (void)powerUp(500U);
     }
 
-    bool HX711::waitReadyUntil(uint32_t timeoutMs, uint32_t pollDelayMs) const {
+    bool HX711::waitReadyUntil(uint32_t timeoutMs, uint32_t pollDelayMs) const
+    {
         const tc::tick_ms_t start = tc::millis();
 
         while ((tc::millis() - start) < timeoutMs) {
@@ -192,10 +208,11 @@ namespace ungula::loadcell {
             tc::delayMs(pollDelayMs);
         }
 
-        return false;  // timeout expired
+        return false; // timeout expired
     }
 
-    void HX711::applyConfigSelection() {
+    void HX711::applyConfigSelection()
+    {
         for (uint8_t i = 0; i < extraPulses_; ++i) {
             gpio::setHigh(clockPin_);
             tc::delayUs(kClockPulseDelayUs);
@@ -204,7 +221,8 @@ namespace ungula::loadcell {
         }
     }
 
-    int32_t HX711::readRawNow() {
+    int32_t HX711::readRawNow()
+    {
         uint8_t by2 = 0U;
         uint8_t by1 = 0U;
         uint8_t by0 = 0U;
@@ -225,4 +243,4 @@ namespace ungula::loadcell {
         return signExtend24(by2, by1, by0);
     }
 
-}  // namespace ungula::loadcell
+} // namespace ungula::loadcell

@@ -6,11 +6,13 @@
 
 #include <ungula/core/time/time_control.h>
 
-namespace ungula::loadcell {
+namespace ungula::loadcell
+{
 
     namespace tc = ungula::core::time;
 
-    bool TensionSensor::readInstant(float& outTension) {
+    bool TensionSensor::readInstant(float &outTension)
+    {
         float value = 0.0F;
         if (!loadCell_.readIfReady(value, config_.unit)) {
             return false;
@@ -22,7 +24,8 @@ namespace ungula::loadcell {
         return true;
     }
 
-    bool TensionSensor::readStable(float& outTension, uint32_t timeoutMs, uint32_t pollDelayMs) {
+    bool TensionSensor::readStable(float &outTension, uint32_t timeoutMs, uint32_t pollDelayMs)
+    {
         const auto start = tc::millis();
 
         while ((tc::millis() - start) < timeoutMs) {
@@ -48,7 +51,8 @@ namespace ungula::loadcell {
         return false;
     }
 
-    void TensionSensor::updateFiltered(float sample) {
+    void TensionSensor::updateFiltered(float sample)
+    {
         previousFilteredTension_ = filteredTension_;
 
         if (std::isnan(filteredTension_)) {
@@ -59,9 +63,8 @@ namespace ungula::loadcell {
         }
 
         if (!std::isnan(previousFilteredTension_)) {
-            stable_ = std::fabs(filteredTension_ - previousFilteredTension_) <=
-                      config_.stabilityTolerance;
+            stable_ = std::fabs(filteredTension_ - previousFilteredTension_) <= config_.stabilityTolerance;
         }
     }
 
-}  // namespace ungula::loadcell
+} // namespace ungula::loadcell

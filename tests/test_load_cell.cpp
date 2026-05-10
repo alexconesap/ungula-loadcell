@@ -10,7 +10,8 @@
 
 #include "mock_adc24.h"
 
-namespace {
+namespace
+{
 
     using ungula::loadcell::LoadCell;
     using MU = LoadCell::ForceUnit;
@@ -20,7 +21,8 @@ namespace {
 
     // ---- Calibration: setCountsPer ----
 
-    TEST(LoadCellTest, UncalibratedReadsReturnNan) {
+    TEST(LoadCellTest, UncalibratedReadsReturnNan)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
 
@@ -29,7 +31,8 @@ namespace {
         EXPECT_TRUE(std::isnan(cell.netToUnit(1000, MU::NEWTONS)));
     }
 
-    TEST(LoadCellTest, SetCountsPerNewtonsStoresDirectly) {
+    TEST(LoadCellTest, SetCountsPerNewtonsStoresDirectly)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
 
@@ -37,7 +40,8 @@ namespace {
         EXPECT_FLOAT_EQ(cell.countsPerNewton(), 50000.0F);
     }
 
-    TEST(LoadCellTest, SetCountsPerKgfConvertsWithGravity) {
+    TEST(LoadCellTest, SetCountsPerKgfConvertsWithGravity)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
 
@@ -48,7 +52,8 @@ namespace {
 
     // ---- Calibration: calibrate() ----
 
-    TEST(LoadCellTest, CalibrateWithNewtonsComputesScale) {
+    TEST(LoadCellTest, CalibrateWithNewtonsComputesScale)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setOffset(1000);
@@ -59,7 +64,8 @@ namespace {
         EXPECT_FLOAT_EQ(cell.countsPerNewton(), 50000.0F);
     }
 
-    TEST(LoadCellTest, CalibrateWithKgfConvertsReferenceToNewtons) {
+    TEST(LoadCellTest, CalibrateWithKgfConvertsReferenceToNewtons)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setOffset(0);
@@ -69,7 +75,8 @@ namespace {
         EXPECT_NEAR(cell.countsPerNewton(), 100000.0F / (2.0F * kG), 0.01F);
     }
 
-    TEST(LoadCellTest, CalibrateIgnoresNonPositiveReference) {
+    TEST(LoadCellTest, CalibrateIgnoresNonPositiveReference)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setCountsPerNewton(12345.0F);
@@ -83,7 +90,8 @@ namespace {
 
     // ---- Offset ----
 
-    TEST(LoadCellTest, OffsetRoundTrips) {
+    TEST(LoadCellTest, OffsetRoundTrips)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
 
@@ -91,26 +99,29 @@ namespace {
         EXPECT_EQ(cell.offset(), -12345);
     }
 
-    TEST(LoadCellTest, CaptureZeroAveragesSamples) {
+    TEST(LoadCellTest, CaptureZeroAveragesSamples)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
 
-        adc.pushSamples({98, 100, 102, 99, 101});
+        adc.pushSamples({ 98, 100, 102, 99, 101 });
         EXPECT_TRUE(cell.captureZero(5, 1000));
         EXPECT_EQ(cell.offset(), 100);
     }
 
-    TEST(LoadCellTest, CaptureZeroPropagatesTimeoutAndPreservesOffset) {
+    TEST(LoadCellTest, CaptureZeroPropagatesTimeoutAndPreservesOffset)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setOffset(777);
 
-        adc.pushSamples({10, 20});  // fewer than requested
+        adc.pushSamples({ 10, 20 }); // fewer than requested
         EXPECT_FALSE(cell.captureZero(5, 1000));
-        EXPECT_EQ(cell.offset(), 777);  // unchanged on failure
+        EXPECT_EQ(cell.offset(), 777); // unchanged on failure
     }
 
-    TEST(LoadCellTest, CaptureZeroZeroSampleCountTreatedAsOne) {
+    TEST(LoadCellTest, CaptureZeroZeroSampleCountTreatedAsOne)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
 
@@ -121,7 +132,8 @@ namespace {
 
     // ---- Unit conversion ----
 
-    TEST(LoadCellTest, RawToUnitSubtractsOffset) {
+    TEST(LoadCellTest, RawToUnitSubtractsOffset)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setOffset(1000);
@@ -132,17 +144,19 @@ namespace {
         EXPECT_FLOAT_EQ(cell.rawToUnit(51000, MU::KGF), 1.0F / kG);
     }
 
-    TEST(LoadCellTest, NetToUnitSkipsOffset) {
+    TEST(LoadCellTest, NetToUnitSkipsOffset)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
-        cell.setOffset(9999);  // ignored by netToUnit
+        cell.setOffset(9999); // ignored by netToUnit
         cell.setCountsPerNewton(50000.0F);
 
         EXPECT_FLOAT_EQ(cell.netToUnit(100000, MU::NEWTONS), 2.0F);
         EXPECT_FLOAT_EQ(cell.netToUnit(100000, MU::KGF), 2.0F / kG);
     }
 
-    TEST(LoadCellTest, KgfAndNewtonsAreConsistent) {
+    TEST(LoadCellTest, KgfAndNewtonsAreConsistent)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setCountsPerKgf(490332.0F);
@@ -155,41 +169,45 @@ namespace {
 
     // ---- Read delegation ----
 
-    TEST(LoadCellTest, ReadIfReadyReturnsFalseWhenAdcNotReady) {
+    TEST(LoadCellTest, ReadIfReadyReturnsFalseWhenAdcNotReady)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setCountsPerNewton(50000.0F);
 
         float value = -1.0F;
         EXPECT_FALSE(cell.readIfReady(value));
-        EXPECT_FLOAT_EQ(value, -1.0F);  // untouched
+        EXPECT_FLOAT_EQ(value, -1.0F); // untouched
     }
 
-    TEST(LoadCellTest, ReadIfReadyConvertsThroughCalibration) {
+    TEST(LoadCellTest, ReadIfReadyConvertsThroughCalibration)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setOffset(500);
         cell.setCountsPerNewton(50000.0F);
 
-        adc.pushSample(50500);  // net = 50000 -> 1 N
+        adc.pushSample(50500); // net = 50000 -> 1 N
         float value = 0.0F;
         EXPECT_TRUE(cell.readIfReady(value, MU::NEWTONS));
         EXPECT_FLOAT_EQ(value, 1.0F);
     }
 
-    TEST(LoadCellTest, ReadWithinConvertsThroughCalibration) {
+    TEST(LoadCellTest, ReadWithinConvertsThroughCalibration)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setOffset(0);
         cell.setCountsPerKgf(490332.0F);
 
-        adc.pushSample(980664);  // ~2 kg
+        adc.pushSample(980664); // ~2 kg
         float kg = 0.0F;
         EXPECT_TRUE(cell.readWithin(kg, 1000, 0, MU::KGF));
         EXPECT_NEAR(kg, 2.0F, 1e-3F);
     }
 
-    TEST(LoadCellTest, ReadWithinReturnsFalseOnTimeout) {
+    TEST(LoadCellTest, ReadWithinReturnsFalseOnTimeout)
+    {
         MockAdc24 adc;
         LoadCell cell(adc);
         cell.setCountsPerNewton(50000.0F);
@@ -200,12 +218,13 @@ namespace {
 
     // ---- Persistence round-trip ----
 
-    TEST(LoadCellTest, OffsetAndScaleRoundTripThroughNewtons) {
+    TEST(LoadCellTest, OffsetAndScaleRoundTripThroughNewtons)
+    {
         MockAdc24 adc;
 
         LoadCell source(adc);
         source.setOffset(12345);
-        source.setCountsPerKgf(50000.0F);  // canonical = 50000 / g
+        source.setCountsPerKgf(50000.0F); // canonical = 50000 / g
 
         const int32_t savedOffset = source.offset();
         const float savedCountsN = source.countsPerNewton();
@@ -218,4 +237,4 @@ namespace {
         EXPECT_FLOAT_EQ(restored.countsPerNewton(), source.countsPerNewton());
     }
 
-}  // namespace
+} // namespace
