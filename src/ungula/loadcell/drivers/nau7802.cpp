@@ -4,7 +4,7 @@
 
 #include "nau7802.h"
 
-#include <ungula/core/time/time_control.h>
+#include <ungula/core/time/time.h>
 #include <ungula/hal/i2c/i2c_master.h>
 
 namespace ungula::loadcell

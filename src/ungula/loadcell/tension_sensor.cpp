@@ -4,7 +4,7 @@
 
 #include "tension_sensor.h"
 
-#include <ungula/core/time/time_control.h>
+#include <ungula/core/time/time.h>
 
 namespace ungula::loadcell
 {

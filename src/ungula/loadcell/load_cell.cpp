@@ -4,7 +4,7 @@
 
 #include "load_cell.h"
 
-#include <ungula/core/time/time_control.h>
+#include <ungula/core/time/time.h>
 #include <cmath>
 
 namespace ungula::loadcell
