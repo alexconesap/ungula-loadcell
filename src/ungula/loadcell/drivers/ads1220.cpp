@@ -5,7 +5,7 @@
 #include "ads1220.h"
 
 #include <ungula/core/time/time.h>
-#include <ungula/hal/gpio/gpio_access.h>
+#include <ungula/hal/gpio/gpio.h>
 #include <ungula/hal/spi/spi_master.h>
 
 namespace ungula::loadcell

@@ -5,7 +5,7 @@
 #include "hx711.h"
 
 #include <ungula/core/time/time.h>
-#include <ungula/hal/gpio/gpio_access.h>
+#include <ungula/hal/gpio/gpio.h>
 
 #if defined(ESP_PLATFORM)
 #include "freertos/FreeRTOS.h"
