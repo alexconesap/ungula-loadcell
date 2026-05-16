@@ -2,6 +2,8 @@
 
 > **High-performance embedded C++ libraries for ESP32, STM32 and other MCUs** — load cell drivers (HX711, NAU7802, ADS1220, ADS1232) with tension sensing.
 
+> **LLM usage note:** if this library is consumed from a coding AI workflow, explicitly point the agent to `API.md` first. `API.md` is the LLM-facing contract (public API + examples + constraints) and avoids wasting time/tokens scanning source files and this human-oriented README.
+
 Load cell driver library for constrained embedded systems (ESP32, Arduino).
 
 ## Table of Contents
@@ -12,8 +14,8 @@ Load cell driver library for constrained embedded systems (ESP32, Arduino).
 - [Quick Start](#quick-start)
 - [Construction vs. use](#construction-vs-use)
 - [Calibration](#calibration)
-  - [Step 1 — Capture Zero](#step-1--capture-zero)
-  - [Step 2 — Determine Scale Factor](#step-2--determine-scale-factor)
+  - [Step 1 — Capture Zero](#step-1-capture-zero)
+  - [Step 2 — Determine Scale Factor](#step-2-determine-scale-factor)
   - [Reading in Different Units](#reading-in-different-units)
   - [Converting Cached Values](#converting-cached-values)
 - [HX711 input configuration](#hx711-input-configuration)
@@ -28,21 +30,15 @@ Load cell driver library for constrained embedded systems (ESP32, Arduino).
 - [Force Conversion and Safe Tension Calculator](#force-conversion-and-safe-tension-calculator)
   - [Unit conversion functions](#unit-conversion-functions)
   - [Safe tension calculator](#safe-tension-calculator)
-  - [Example 1 — 304 Stainless Steel mandrel, 0.5 mm diameter](#example-1--304-stainless-steel-mandrel-05-mm-diameter)
-  - [Example 2 — Nitinol mandrel, 0.3 mm diameter](#example-2--nitinol-mandrel-03-mm-diameter)
-  - [Example 3 — Imperial datasheet (psi + inches)](#example-3--imperial-datasheet-psi--inches)
-  - [Example 4 — Comparing materials side by side](#example-4--comparing-materials-side-by-side)
+  - [Example 1 — 304 Stainless Steel mandrel, 0.5 mm diameter](#example-1-304-stainless-steel-mandrel-05-mm-diameter)
+  - [Example 2 — Nitinol mandrel, 0.3 mm diameter](#example-2-nitinol-mandrel-03-mm-diameter)
+  - [Example 3 — Imperial datasheet (psi + inches)](#example-3-imperial-datasheet-psi-inches)
+  - [Example 4 — Comparing materials side by side](#example-4-comparing-materials-side-by-side)
   - [Standalone conversions](#standalone-conversions)
 - [Testing](#testing)
+- [Acknowledgements](#acknowledgements)
 - [License](#license)
-
-The library is split into two layers so you can swap the 24-bit ADC chip without touching the calibration or unit-conversion code:
-
-- **`IAdc24`** — chip-neutral interface for any 24-bit signed delta-sigma ADC (ready polling, raw sample, power management, reset).
-- **`HX711`, `NAU7802`, `ADS1220`, `ADS1232`** — concrete drivers. Each handles its own wiring (GPIO bit-bang, I2C, SPI) and chip-specific config (gain values, channel multiplexing, data rate).
-- **`LoadCell`** — chip-agnostic load-cell semantics: zero offset, calibration scale, unit conversion (Newtons / kilograms-force / pounds-force), convenience reads. Takes any `IAdc24` via constructor injection.
-- **`TensionSensor`** — filtered tension reading with EMA smoothing, stability detection, and target tolerance bands. Wraps a `LoadCell` reference for process-control use cases (e.g. mandrel winding, tension monitoring).
-- **`force_convert.h`** — header-only utilities for force/stress/length unit conversions and safe working tension calculation from material datasheets.
+- [Arduino CLI symlink note (rarely relevant)](#arduino-cli-symlink-note-rarely-relevant)
 
 ## Features
 
